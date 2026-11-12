@@ -17,24 +17,29 @@
   }
 
   // --- menu mobile ---
-  const toggle = $("#navToggle"), links = $("#navLinks");
-  function setMenu(open) {
-    links.classList.toggle("open", open);
-    toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    toggle.setAttribute("aria-label", open ? "Đóng menu" : "Mở menu");
-  }
-  if (toggle && links) {
-    toggle.addEventListener("click", () => setMenu(!links.classList.contains("open")));
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
-    document.addEventListener("click", (e) => {
-      if (links.classList.contains("open") && !e.target.closest("#navLinks,#navToggle")) setMenu(false);
-    });
-    // danh dau muc dang mo (ke ca /cap-nhat, trang khong co token active tu server)
+  // hotbar: danh dau o dang chon (ke ca /cap-nhat, trang khong co token active tu server)
+  const links = $("#navLinks");
+  if (links) {
     const here = location.pathname.replace(/\/+$/, "") || "/";
     $$("a", links).forEach((a) => {
       const href = a.getAttribute("href");
       if (href === here || (href !== "/" && here.startsWith(href + "/"))) a.setAttribute("aria-current", "page");
     });
+  }
+
+  // --- thanh XP = tien do cuon trang (gan qua CSSOM, khong vi pham CSP) ---
+  const xp = $("#xpFill");
+  if (xp) {
+    let ticking = false;
+    const paint = () => {
+      ticking = false;
+      const h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+      xp.style.transform = "scaleX(" + (max > 0 ? Math.min(1, h.scrollTop / max) : 0) + ")";
+    };
+    const queue = () => { if (!ticking) { ticking = true; requestAnimationFrame(paint); } };
+    addEventListener("scroll", queue, { passive: true });
+    addEventListener("resize", queue);
+    paint();
   }
 
   // --- muc luc cho trang doc dai (luat / huong dan / cap nhat) ---
@@ -97,16 +102,23 @@
         if (d.server.offline) { txt.textContent = "Server đang tắt — sẽ mở lại sớm"; if (dot) dot.className = "dot off"; }
         else { txt.textContent = "Server đang mở · " + d.server.online + "/" + d.server.max + " người chơi · " + d.server.version; if (dot) dot.className = "dot on"; }
       }
+      // chip trang thai tren thanh HUD (co o moi trang)
+      const hd = $("#hudDot"), ho = $("#hudOnline");
+      if (ho) {
+        ho.textContent = d.server.offline ? "Đang tắt" : d.server.online + "/" + d.server.max;
+        if (hd) hd.className = d.server.offline ? "dot off" : "dot on";
+      }
       const so = $("#stOnline");
       if (so) countUp(so, d.server.offline ? 0 : d.server.online);
-    } catch (e) { /* giu nguyen giao dien */ }
+    } catch (e) { const ho = $("#hudOnline"); if (ho) ho.textContent = "—"; }
+    if (!$("#stResidents")) return;
     try {
       const s = await (await fetch("/api/stats")).json();
       countUp($("#stResidents"), s.residents || 0);
       countUp($("#stMoney"), s.total_money || 0, "₫");
     } catch (e) { /* bo qua */ }
   }
-  if ($("#statusText") || $("#stOnline")) loadStatus();
+  if ($("#statusText") || $("#stOnline") || $("#hudOnline")) loadStatus();
 
   // --- copy IP ---
   $$("[data-copy]").forEach((btn) => btn.addEventListener("click", async () => {
@@ -167,7 +179,9 @@
       fh.innerHTML = rows.map((t, i) =>
         '<a class="f-hot-row" href="/dien-dan/chu-de/' + t.id + '">'
         + '<span class="f-hot-num">' + (i + 1) + '</span>'
-        + '<span class="f-hot-main"><span class="f-hot-title">' + t.title.replace(/</g, "&lt;") + '</span>'
+        + '<span class="f-hot-main"><span class="f-hot-title">'
+        + (t.author ? '<b class="chat-name">&lt;' + String(t.author).replace(/</g, "&lt;") + '&gt;</b> ' : "")
+        + t.title.replace(/</g, "&lt;") + '</span>'
         + '<span class="f-hot-meta">' + t.replies + ' trả lời · ' + t.views + ' lượt xem · ' + t.likes + ' thích</span></span></a>').join("");
     } catch (e) { fh.innerHTML = '<p class="f-hot-meta">Chưa tải được diễn đàn — <a href="/dien-dan">vào diễn đàn →</a></p>'; }
   })();

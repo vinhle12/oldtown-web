@@ -2,10 +2,11 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>%%TITLE%%</title>
 <meta name="description" content="OLD TOWN — server Minecraft sinh tồn Việt Nam: xây thị trấn, kinh tế, hầm ngục 10 cấp. Chơi chung PC & điện thoại (PE).">
-<meta name="theme-color" content="#111a14">
+<meta name="theme-color" content="#0c0f0d">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="/static/img/icon.png">
 <link rel="apple-touch-icon" href="/static/img/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,26 +17,26 @@
 </head>
 <body>
 <a class="skip-link" href="#main">Bỏ qua, tới nội dung chính</a>
-<header class="site-header">
-  <div class="site-header-in">
+<header class="hud">
+  <div class="hud-in">
     <a class="brand" href="/" aria-label="OLD TOWN — về trang chủ">
-      <img class="brand-mark" src="/static/img/px/grass.svg" width="40" height="40" alt="">
-      <span class="brand-text">
-        <span class="brand-name">OLD TOWN</span>
-        <span class="brand-sub">Towns · Sinh tồn · Việt Nam</span>
-      </span>
+      <img class="brand-mark" src="/static/img/art/block.png" width="32" height="36" alt="">
+      <span class="brand-name">OLD TOWN</span>
     </a>
-    <button class="nav-toggle" id="navToggle" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
-    <nav class="nav-links" id="navLinks" aria-label="Điều hướng chính">
-      <a href="/"%%NAV_HOME%%><img src="/static/img/px/house.svg" width="20" height="20" alt="">Trang chủ</a>
-      <a href="/luat"%%NAV_LUAT%%><img src="/static/img/px/book.svg" width="20" height="20" alt="">Luật</a>
-      <a href="/huong-dan"%%NAV_HD%%><img src="/static/img/px/compass.svg" width="20" height="20" alt="">Hướng dẫn</a>
-      <a href="/dien-dan"%%NAV_FORUM%%><img src="/static/img/px/sign.svg" width="20" height="20" alt="">Diễn đàn</a>
-      <a href="/cap-nhat"><img src="/static/img/px/paper.svg" width="20" height="20" alt="">Cập nhật</a>
-      <a href="/bang-xep-hang"%%NAV_BXH%%><img src="/static/img/px/coin.svg" width="20" height="20" alt="">Top tiền</a>
-      <a href="/tai-khoan" data-cta%%NAV_TK%%><img src="/static/img/px/head.svg" width="20" height="20" alt="">Tài khoản</a>
+    <nav class="hotbar" id="navLinks" aria-label="Điều hướng chính">
+      <a href="/"%%NAV_HOME%%><img src="/static/img/px/house.svg" width="24" height="24" alt=""><span>Trang chủ</span></a>
+      <a href="/luat"%%NAV_LUAT%%><img src="/static/img/px/book.svg" width="24" height="24" alt=""><span>Luật</span></a>
+      <a href="/huong-dan"%%NAV_HD%%><img src="/static/img/px/compass.svg" width="24" height="24" alt=""><span>Hướng dẫn</span></a>
+      <a href="/dien-dan"%%NAV_FORUM%%><img src="/static/img/px/sign.svg" width="24" height="24" alt=""><span>Diễn đàn</span></a>
+      <a href="/cap-nhat"><img src="/static/img/px/paper.svg" width="24" height="24" alt=""><span>Cập nhật</span></a>
+      <a href="/bang-xep-hang"%%NAV_BXH%%><img src="/static/img/px/coin.svg" width="24" height="24" alt=""><span>Top tiền</span></a>
+      <a href="/tai-khoan"%%NAV_TK%%><img src="/static/img/px/head.svg" width="24" height="24" alt=""><span>Tài khoản</span></a>
     </nav>
+    <a class="hud-status" href="/#vao-server" title="Trạng thái server — bấm để xem địa chỉ vào chơi">
+      <span class="dot" id="hudDot"></span><span id="hudOnline">…</span>
+    </a>
   </div>
+  <div class="xp" aria-hidden="true"><i id="xpFill"></i></div>
 </header>
 <main class="page" id="main">
 %%BODY%%
@@ -45,7 +46,7 @@
   <div class="footer-soil">
     <div class="footer-inner">
       <div class="footer-about">
-        <div class="footer-brand"><img src="/static/img/px/grass.svg" width="32" height="32" alt="">OLD TOWN</div>
+        <div class="footer-brand"><img src="/static/img/art/block.png" width="32" height="36" alt="">OLD TOWN</div>
         <p>Server Minecraft sinh tồn Việt Nam. Một tài khoản dùng chung cho web và game — đăng ký ở đâu, chơi ở đó.</p>
       </div>
       <nav class="footer-links" aria-label="Liên kết cuối trang">

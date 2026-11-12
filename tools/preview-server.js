@@ -252,7 +252,7 @@ function api(p, q, req) {
   if (p === "/api/stats") return { residents: 412, total_money: 18645300 };
   if (p === "/api/topmoney") return { top: TOP };
   if (p === "/api/config") return { email_on: true };
-  if (p === "/api/forum/threads") return { threads: THREADS.slice(0, 3).map((t) => ({ id: t.id, title: t.title, replies: t.replies, views: t.views, likes: t.likes })) };
+  if (p === "/api/forum/threads") return { threads: THREADS.slice(0, 3).map((t) => ({ id: t.id, title: t.title, author: t.author_name, category: t.category_name, replies: t.replies, views: t.views, likes: t.likes })) };
   if (p === "/api/me") return { ok: true, name: "Chooty_427", uuid: "3f2b9c1e-7a4d-4e0b-9c55-0d6f1a2b3c4d", balance: 1284500, discord_id: null, email: "ch***@gmail.com", email_on: true };
   if (p === "/api/otp/register" || p === "/api/otp/forgot" || p === "/api/otp/setemail") return { ok: true };
   if (req.method === "POST") return { ok: false, error: "Bản xem thử: thao tác này chỉ chạy trên server thật." };
