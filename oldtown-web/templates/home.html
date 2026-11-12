@@ -1,8 +1,9 @@
 <section class="hero" id="vao-server">
-  <picture class="hero-bg" aria-hidden="true">
-    <source media="(max-width: 760px)" srcset="/static/img/hero-1080.webp">
-    <img src="/static/img/hero-1920.webp" width="1920" height="823" alt="" fetchpriority="high">
-  </picture>
+  <div class="hero-bg" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="metadata" poster="/static/img/hero-sakura.webp">
+      <source src="/static/img/hero-sakura.mp4" type="video/mp4">
+    </video>
+  </div>
   <div class="hero-in">
     <a class="update-banner" href="/cap-nhat">
       <span class="ub-slot"><img src="/static/img/px/star.svg" width="24" height="24" alt=""></span>
@@ -43,6 +44,22 @@
         <div class="stat"><dt class="stat-label">Lãi gửi ngân hàng</dt><dd class="stat-num">2<small>% /ngày</small></dd></div>
       </dl>
     </aside>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="cols-forum">
+    <header class="section-head">
+      <p class="kicker">Diễn đàn cư dân</p>
+      <h2 class="section-title">Hỏi đáp, khoe nhà, <em>rao đồ</em></h2>
+      <p class="section-lead">Diễn đàn của thị trấn đã mở: hỏi luật, khoe công trình, tuyển người vào town hay rao đồ trên chợ — dùng chung tài khoản web + game, đăng nhập là viết bài được ngay.</p>
+      <a class="btn" href="/dien-dan">Vào diễn đàn →</a>
+    </header>
+    <div class="f-home-card">
+      <div class="f-home-title">Chủ đề đang hot</div>
+      <div id="forumHot"><p class="f-hot-meta">Đang tải chủ đề đang hot…</p></div>
+      <a class="chat-input" href="/dien-dan"><span>Vào diễn đàn để viết bài</span><i aria-hidden="true"></i></a>
+    </div>
   </div>
 </section>
 
@@ -184,22 +201,6 @@
         <ol class="top-preview" id="topPreview"><li><span class="tp-name muted">Đang tải số liệu từ game…</span></li></ol>
       </div>
       <p class="data-note">Số dư VNĐ thật trong game, làm mới mỗi phút. <a href="/bang-xep-hang">Xem bảng xếp hạng đầy đủ →</a></p>
-    </div>
-  </div>
-</section>
-
-<section class="sec">
-  <div class="cols-forum">
-    <header class="section-head">
-      <p class="kicker">Diễn đàn cư dân</p>
-      <h2 class="section-title">Hỏi đáp, khoe nhà, <em>rao đồ</em></h2>
-      <p class="section-lead">Diễn đàn của thị trấn đã mở: hỏi luật, khoe công trình, tuyển người vào town hay rao đồ trên chợ — dùng chung tài khoản web + game, đăng nhập là viết bài được ngay.</p>
-      <a class="btn" href="/dien-dan">Vào diễn đàn →</a>
-    </header>
-    <div class="f-home-card">
-      <div class="f-home-title">Chủ đề đang hot</div>
-      <div id="forumHot"><p class="f-hot-meta">Đang tải chủ đề đang hot…</p></div>
-      <a class="chat-input" href="/dien-dan"><span>Vào diễn đàn để viết bài</span><i aria-hidden="true"></i></a>
     </div>
   </div>
 </section>

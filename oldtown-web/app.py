@@ -393,8 +393,54 @@ def forum_badges(t):
     return out
 
 
+# ---------- anh dinh kem dien dan ----------
+# Anh luu ngoai thu muc web (cung cho voi forum.db, ghi duoc khi ProtectSystem=full),
+# phuc vu qua /uploads/. Trong noi dung bai, moi anh la 1 dong danh dau
+# "[anh:/uploads/<32 hex>.<duoi>]" — khong can doi schema DB.
+UPLOAD_DIR = os.environ.get("FORUM_UPLOAD_DIR") or os.path.join(
+    os.path.dirname(forum_mod.FORUM_DB) or ".", "uploads")
+UPLOAD_MAX = 4 * 1024 * 1024
+UPLOAD_PER_POST = 4
+_IMG_PATH = r"/uploads/[0-9a-f]{32}\.(?:png|jpg|webp|gif)"
+IMG_LINE_RE = re.compile(r"^\[anh:(" + _IMG_PATH + r")\]$")
+IMG_ANY_RE = re.compile(r"\[anh:(" + _IMG_PATH + r")\]")
+
+
+def sniff_image(head):
+    """Nhan dang anh bang chu ky file (khong tin ten file / Content-Type gui len)."""
+    if head.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if head.startswith(b"\xff\xd8\xff"):
+        return "jpg"
+    if head[:6] in (b"GIF87a", b"GIF89a"):
+        return "gif"
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "webp"
+    return None
+
+
+def forum_img_html(url):
+    return (f'<figure class="f-img"><a href="{url}" target="_blank" rel="noopener">'
+            f'<img src="{url}" alt="Ảnh đính kèm" loading="lazy"></a></figure>')
+
+
+# Khoi "Them anh" dung chung cho form tao bai va form tra loi (forum.js xu ly).
+FORUM_ATTACH_HTML = (
+    '<div class="f-attach" data-attach>'
+    '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>'
+    '<button type="button" class="f-mini" data-attach-pick>+ Thêm ảnh</button>'
+    '<span class="f-attach-note">Tối đa 4 ảnh, mỗi ảnh không quá 4 MB (PNG, JPG, WebP, GIF)</span>'
+    '<div class="f-attach-list"></div></div>')
+
+
+def forum_plain(content):
+    """Bo cac dong danh dau anh (ke ca dong bi cat do substr) de lam doan trich."""
+    text = IMG_ANY_RE.sub("", content or "")
+    return re.sub(r"\[anh:[^\]\n]*$", "", text).strip()
+
+
 def forum_text(content):
-    """Escape HTML; dong bat dau bang '> ' thanh trich dan (blockquote)."""
+    """Escape HTML; dong '> ' thanh trich dan; dong [anh:/uploads/...] thanh anh."""
     parts, plain = [], []
 
     def flush_plain():
@@ -403,7 +449,11 @@ def forum_text(content):
             plain.clear()
 
     for ln in html.escape(content or "").split("\n"):
-        if ln.startswith("&gt;"):
+        img = IMG_LINE_RE.match(ln.strip())
+        if img:
+            flush_plain()
+            parts.append(forum_img_html(img.group(1)))
+        elif ln.startswith("&gt;"):
             flush_plain()
             parts.append("<blockquote><p>" + ln[4:].strip() + "</p></blockquote>")
         else:
@@ -423,7 +473,8 @@ def forum_tag_chips(tags):
 
 def forum_thread_row(conn, t, me_name=None):
     st = forum_mod.thread_stats(conn, t["id"])
-    excerpt = (t["excerpt"] or "").strip() if "excerpt" in t.keys() else ""
+    excerpt = forum_plain(t["excerpt"]) if "excerpt" in t.keys() else ""
+    first_img = IMG_ANY_RE.search(t["op_content"] or "") if "op_content" in t.keys() else None
     # Hang thread la <div> (khong phai <a>): tag ben trong cung la <a>, HTML cam
     # long <a> trong <a> — trinh duyet se be cau truc. Dieu huong bang JS (forum.js).
     row = (
@@ -432,6 +483,8 @@ def forum_thread_row(conn, t, me_name=None):
         f'<span class="f-thread-main"><span class="f-thread-title">{html.escape(t["title"])}</span>')
     if excerpt:
         row += f'<span class="f-thread-excerpt">{html.escape(excerpt)}</span>'
+    if first_img:
+        row += f'<span class="f-thread-img"><img src="{first_img.group(1)}" alt="" loading="lazy"></span>'
     row += (
         f'<span class="f-thread-meta">{html.escape(t["author_name"])} · {fmt_dt(t["created_at"])} '
         f'· {html.escape(t["category_name"])} {forum_badges(t)}</span>'
@@ -575,7 +628,9 @@ def forum_list_threads(conn, sort="new", category_id=None, q="", tag="", limit=3
         " (SELECT COALESCE(SUM(v.value),0) FROM votes v JOIN posts p ON p.id=v.post_id"
         "  WHERE p.thread_id=t.id) AS likes,"
         " (SELECT substr(content,1,140) FROM posts p WHERE p.thread_id=t.id"
-        "   AND p.parent_post_id IS NULL) AS excerpt"
+        "   AND p.parent_post_id IS NULL) AS excerpt,"
+        " (SELECT content FROM posts p WHERE p.thread_id=t.id"
+        "   AND p.parent_post_id IS NULL) AS op_content"
         f" FROM threads t JOIN categories c ON c.id=t.category_id"
         f" WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ? OFFSET ?")
     return conn.execute(sql, params + [limit, offset]).fetchall()
@@ -622,7 +677,9 @@ async def pg_forum(request):
             '<div class="f-hero"><h1>Cộng đồng cư dân OLD TOWN</h1>'
             '<p>Chỗ cư dân hỏi đáp, khoe nhà, tuyển town và rao đồ — dùng chung tài khoản web + game, '
             'đăng nhập rồi mới đăng bài được. Bài gắn nhãn “Bài mẫu” là dữ liệu mẫu từ bản dựng thử.</p>'
-            '<div class="f-hero-actions"><a class="f-btn f-btn-accent" href="/dien-dan/tao-bai">Tạo bài viết</a></div>'
+            '<a class="f-quick" href="/dien-dan/tao-bai">' + forum_avatar(me or "?") +
+            '<span class="f-quick-text">Bạn muốn chia sẻ gì với thị trấn?</span>'
+            '<span class="f-quick-btn">Ảnh</span><span class="f-quick-btn f-quick-post">Đăng bài</span></a>'
             f'<p class="f-stats"><b>{total["m"]}</b> thành viên · <b>{total["t"]}</b> chủ đề · <b>{total["p"]}</b> bài viết</p></div>'
             + '<h2 class="f-h2">' + forum_icon("flame", 20) + ' Đang hot</h2><div>'
             + "".join(forum_hot_row(i + 1, t) for i, t in enumerate(hot)) + '</div>'
@@ -694,7 +751,8 @@ async def pg_forum_new(request):
             '<label>Chuyên mục<select name="category_id" id="ntCat">' + opts + "</select></label>"
             '<label>Tiêu đề<input name="title" id="ntTitle" maxlength="120" required placeholder="Viết tiêu đề ngắn gọn, rõ ý…"></label>'
             '<label>Thẻ (cách nhau bằng dấu phẩy, tối đa 5)<input name="tags" id="ntTags" maxlength="120" placeholder="vd: nhà-gỗ, góp-ý"></label>'
-            '<label>Nội dung<textarea name="content" id="ntContent" rows="10" maxlength="8000" required placeholder="Viết nội dung bài viết…"></textarea></label>'
+            '<label>Nội dung<textarea name="content" id="ntContent" rows="10" maxlength="7500" placeholder="Viết nội dung bài viết…"></textarea></label>'
+            + FORUM_ATTACH_HTML +
             '<p class="form-msg" id="ntMsg"></p>'
             '<button class="f-btn f-btn-accent f-btn-block" type="submit">Đăng bài</button>'
             "</form>")
@@ -801,7 +859,8 @@ async def pg_forum_thread(request):
                 '<label id="rpParentLabel" hidden>Đang trả lời bài <b id="rpParentName"></b> '
                 '<button type="button" class="f-mini" id="rpCancel">Hủy</button></label>'
                 '<label>Trả lời với tên <b>' + html.escape(me) + "</b>"
-                '<textarea id="rpContent" rows="5" maxlength="8000" required placeholder="Viết trả lời của bạn…"></textarea></label>'
+                '<textarea id="rpContent" rows="5" maxlength="7500" placeholder="Viết trả lời của bạn…"></textarea></label>'
+                + FORUM_ATTACH_HTML +
                 '<p class="form-msg" id="rpMsg"></p>'
                 '<button class="f-btn f-btn-accent f-btn-block" type="submit">Gửi trả lời</button></form></div>')
         elif t["locked"]:
@@ -830,6 +889,63 @@ def forum_me(request):
     if not sess:
         return None, web.json_response({"ok": False, "error": "Hãy đăng nhập trước."}, status=401)
     return sess["name"], None
+
+
+def forum_content_error(content):
+    """Kiem tra chung cho bai moi / tra loi; tra ve cau bao loi hoac None."""
+    if not (1 <= len(content) <= 8000):
+        return "Bài viết cần có chữ hoặc ảnh, tối đa 8000 ký tự."
+    if len(IMG_ANY_RE.findall(content)) > UPLOAD_PER_POST:
+        return f"Mỗi bài tối đa {UPLOAD_PER_POST} ảnh."
+    return None
+
+
+async def api_forum_upload(request):
+    """Nhan 1 anh (multipart, truong 'file'), luu vao UPLOAD_DIR, tra ve duong dan."""
+    me, err = forum_me(request)
+    if err:
+        return err
+    ip = request.remote or "?"
+    if not rate_ok(ip, "forum_upload", 20, 600):
+        return web.json_response({"ok": False, "error": "Bạn tải ảnh quá nhanh — chờ một lúc rồi thử lại."})
+    try:
+        reader = await request.multipart()
+        part = await reader.next()
+    except Exception:
+        part = None
+    if part is None or getattr(part, "name", None) != "file":
+        return web.json_response({"ok": False, "error": "Không nhận được ảnh."})
+    # Doc theo tung khuc va tu chan dung luong (client_max_size khong ap cho multipart stream).
+    buf = bytearray()
+    while True:
+        chunk = await part.read_chunk(65536)
+        if not chunk:
+            break
+        buf += chunk
+        if len(buf) > UPLOAD_MAX:
+            return web.json_response({"ok": False, "error": "Ảnh quá lớn — tối đa 4 MB mỗi ảnh."})
+    ext = sniff_image(bytes(buf[:16]))
+    if not ext:
+        return web.json_response({"ok": False, "error": "Chỉ nhận ảnh PNG, JPG, WebP hoặc GIF."})
+    name = secrets.token_hex(16) + "." + ext
+    try:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        with open(os.path.join(UPLOAD_DIR, name), "wb") as f:
+            f.write(buf)
+    except OSError:
+        return web.json_response({"ok": False, "error": "Server chưa lưu được ảnh — báo admin kiểm tra thư mục uploads."})
+    return web.json_response({"ok": True, "url": "/uploads/" + name})
+
+
+async def pg_upload(request):
+    """Phuc vu anh da tai len. Ten file bi rang buoc 32 hex + duoi nen khong the di ra ngoai thu muc."""
+    name = request.match_info["name"]
+    if not re.fullmatch(r"[0-9a-f]{32}\.(?:png|jpg|webp|gif)", name):
+        raise web.HTTPNotFound()
+    path = os.path.join(UPLOAD_DIR, name)
+    if not os.path.isfile(path):
+        raise web.HTTPNotFound()
+    return web.FileResponse(path, headers={"Cache-Control": "public, max-age=604800, immutable"})
 
 
 async def api_forum_threads_list(request):
@@ -880,8 +996,9 @@ async def api_forum_create_thread(request):
     tags = ",".join(t.strip()[:40] for t in str(body.get("tags") or "").split(",") if t.strip())[:5]
     if not (3 <= len(title) <= 120):
         return web.json_response({"ok": False, "error": "Tiêu đề cần 3–120 ký tự."})
-    if not (1 <= len(content) <= 8000):
-        return web.json_response({"ok": False, "error": "Nội dung cần 1–8000 ký tự."})
+    bad = forum_content_error(content)
+    if bad:
+        return web.json_response({"ok": False, "error": bad})
     conn = forum_mod.forum_conn()
     try:
         cat = conn.execute("SELECT id FROM categories WHERE id=?", (cid,)).fetchone()
@@ -916,8 +1033,9 @@ async def api_forum_create_post(request):
     except Exception:
         return web.json_response({"ok": False, "error": "Chủ đề không hợp lệ."})
     content = (body.get("content") or "").strip()
-    if not (1 <= len(content) <= 8000):
-        return web.json_response({"ok": False, "error": "Nội dung cần 1–8000 ký tự."})
+    bad = forum_content_error(content)
+    if bad:
+        return web.json_response({"ok": False, "error": bad})
     conn = forum_mod.forum_conn()
     try:
         t = conn.execute("SELECT locked FROM threads WHERE id=?", (tid,)).fetchone()
@@ -1463,6 +1581,8 @@ def build_app():
     app.router.add_get("/api/forum/reports", api_forum_reports)
     app.router.add_post("/api/forum/threads", api_forum_create_thread)
     app.router.add_post("/api/forum/posts", api_forum_create_post)
+    app.router.add_post("/api/forum/upload", api_forum_upload)
+    app.router.add_get("/uploads/{name}", pg_upload)
     app.router.add_post("/api/forum/vote", api_forum_vote)
     app.router.add_post("/api/forum/reaction", api_forum_reaction)
     app.router.add_post("/api/forum/best-answer", api_forum_best)

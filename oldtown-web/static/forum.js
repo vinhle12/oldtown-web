@@ -49,10 +49,61 @@
     }
   });
 
+  // --- đính kèm ảnh: tải lên ngay khi chọn, hiện ảnh nhỏ, bấm × để bỏ ---
+  const MAX_IMG = 4, MAX_BYTES = 4 * 1024 * 1024;
+  document.querySelectorAll("[data-attach]").forEach((box) => {
+    const input = box.querySelector('input[type="file"]');
+    const list = box.querySelector(".f-attach-list");
+    const pick = box.querySelector("[data-attach-pick]");
+    box._urls = [];
+    function render() {
+      list.textContent = "";
+      box._urls.forEach((u, i) => {
+        const item = document.createElement("span");
+        item.className = "f-attach-item";
+        const im = document.createElement("img");
+        im.src = u; im.alt = "";
+        const rm = document.createElement("button");
+        rm.type = "button"; rm.textContent = "×"; rm.setAttribute("aria-label", "Bỏ ảnh này");
+        rm.addEventListener("click", () => { box._urls.splice(i, 1); render(); });
+        item.append(im, rm);
+        list.appendChild(item);
+      });
+    }
+    pick.addEventListener("click", () => input.click());
+    input.addEventListener("change", async () => {
+      const label = pick.textContent;
+      pick.disabled = true;
+      for (const file of Array.from(input.files)) {
+        if (box._urls.length >= MAX_IMG) { toast("Mỗi bài tối đa " + MAX_IMG + " ảnh."); break; }
+        if (file.size > MAX_BYTES) { toast("“" + file.name + "” lớn hơn 4 MB — hãy chọn ảnh nhẹ hơn."); continue; }
+        pick.textContent = "Đang tải ảnh…";
+        const fd = new FormData();
+        fd.append("file", file);
+        try {
+          const d = await (await fetch("/api/forum/upload", { method: "POST", body: fd })).json();
+          if (d.ok) { box._urls.push(d.url); render(); }
+          else toast(d.error || "Tải ảnh thất bại.");
+        } catch (err) { toast("Không tải được ảnh — thử lại sau."); }
+      }
+      pick.textContent = label;
+      pick.disabled = false;
+      input.value = "";
+    });
+  });
+  // Ghép chữ + các dòng đánh dấu ảnh thành nội dung gửi lên server.
+  function withImages(form, text) {
+    const box = form.querySelector("[data-attach]");
+    const marks = ((box && box._urls) || []).map((u) => "[anh:" + u + "]");
+    return [String(text || "").trim()].concat(marks).filter(Boolean).join("\n");
+  }
+
   // --- tạo chủ đề mới ---
   const nf = $("#newThreadForm");
   if (nf) nf.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const content = withImages(nf, $("#ntContent").value);
+    if (!content) { msg("#ntMsg", false, "Hãy viết nội dung hoặc thêm ít nhất một ảnh."); return; }
     const b = nf.querySelector('button[type="submit"]');
     b.disabled = true;
     try {
@@ -60,7 +111,7 @@
         category_id: $("#ntCat").value,
         title: $("#ntTitle").value,
         tags: $("#ntTags").value,
-        content: $("#ntContent").value,
+        content,
       });
       if (d.ok) { location.href = "/dien-dan/chu-de/" + d.id; return; }
       msg("#ntMsg", false, d.error || "Đăng bài thất bại.");
@@ -90,13 +141,15 @@
     });
     rf.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const content = withImages(rf, $("#rpContent").value);
+      if (!content) { msg("#rpMsg", false, "Hãy viết trả lời hoặc thêm ít nhất một ảnh."); return; }
       const b = rf.querySelector('button[type="submit"]');
       b.disabled = true;
       try {
         const d = await post("/api/forum/posts", {
           thread_id: $("#rpThread").value,
           parent_post_id: parentInput.value || null,
-          content: $("#rpContent").value,
+          content,
         });
         if (d.ok) { location.reload(); return; }
         msg("#rpMsg", false, d.error || "Gửi trả lời thất bại.");

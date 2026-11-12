@@ -51,8 +51,8 @@ function frame(name, c) {
   const g = rows.map((r) => [...r].map((ch) => (ch === "." ? null : c[ch])));
   fs.writeFileSync(path.join(OUT, "ui", name + ".png"), gridPng(g, 6));
 }
-frame("frame-dark", { o: "#040605", h: "#39443c", m: "#1e2521", f: "#151a17", s: "#0a0d0b" });
-frame("frame-raised", { o: "#040605", h: "#4b594e", m: "#283029", f: "#1d2420", s: "#0d110f" });
+frame("frame-dark", { o: "#07060d", h: "#474066", m: "#272339", f: "#1c192b", s: "#100e1a" });
+frame("frame-raised", { o: "#07060d", h: "#62588a", m: "#342e4c", f: "#272339", s: "#15121f" });
 frame("frame-gui", { o: "#0a0a0a", h: "#ffffff", m: "#c6c6c6", f: "#c6c6c6", s: "#555555" });
 frame("frame-paper", { o: "#231d12", h: "#fbf6e4", m: "#ece3c8", f: "#ece3c8", s: "#c9bb95" });
 frame("frame-tip", { o: "#12061c", h: "#5a1fd0", m: "#3f1496", f: "#12061c", s: "#2d0d70" });

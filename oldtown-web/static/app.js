@@ -27,6 +27,10 @@
     });
   }
 
+  // video nen: neu nguoi dung bat "giam chuyen dong" thi dung o khung hinh cho
+  const heroVideo = $(".hero-bg video");
+  if (heroVideo && reduced) { heroVideo.removeAttribute("autoplay"); heroVideo.pause(); }
+
   // --- thanh XP = tien do cuon trang (gan qua CSSOM, khong vi pham CSP) ---
   const xp = $("#xpFill");
   if (xp) {

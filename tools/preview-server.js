@@ -115,6 +115,7 @@ function threadRow(t) {
   return `<div class="f-thread" data-href="/dien-dan/chu-de/${t.id}" tabindex="0" role="link">${avatar(t.author_name)}`
     + `<span class="f-thread-main"><span class="f-thread-title">${esc(t.title)}</span>`
     + `<span class="f-thread-excerpt">${esc(t.excerpt)}</span>`
+    + (t.id === 5 ? `<span class="f-thread-img"><img src="${SAMPLE_IMG}" alt="" loading="lazy"></span>` : "")
     + `<span class="f-thread-meta">${esc(t.author_name)} · ${t.created} · ${esc(t.category_name)} ${badges(t)}</span>`
     + `<span class="f-thread-tags">${tagChips(t.tags)}</span></span>`
     + `<span class="f-thread-stats"><b>${t.replies}</b> trả lời<br><b>${t.views}</b> lượt xem<br><b>${t.likes}</b> thích</span></div>`;
@@ -167,12 +168,18 @@ function sortTabs(base, sort) {
   return '<div class="f-tabs">' + [["new", "Mới nhất"], ["hot", "Đang hot"], ["top", "Nhiều thích"]]
     .map(([k, l]) => `<a href="${base}?sort=${k}"${k === sort ? ' class="active"' : ""}>${l}</a>`).join("") + "</div>";
 }
+const ATTACH = '<div class="f-attach" data-attach><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>'
+  + '<button type="button" class="f-mini" data-attach-pick>+ Thêm ảnh</button><span class="f-attach-note">Tối đa 4 ảnh, mỗi ảnh không quá 4 MB (PNG, JPG, WebP, GIF)</span>'
+  + '<div class="f-attach-list"></div></div>';
+const SAMPLE_IMG = "/static/img/hero-sakura.webp";
+const imgHtml = (u) => '<figure class="f-img"><a href="' + u + '" target="_blank" rel="noopener"><img src="' + u + '" alt="Ảnh đính kèm" loading="lazy"></a></figure>';
 const forumPage = (title, body) => renderPage("forum.html", title, { FORUM_BODY: body }, "forum", '<script src="/static/forum.js?v=%%V%%" defer></script>');
 
 function pgForum(sort, me) {
   const main = '<div class="f-hero"><h1>Cộng đồng cư dân OLD TOWN</h1>'
     + '<p>Chỗ cư dân hỏi đáp, khoe nhà, tuyển town và rao đồ — dùng chung tài khoản web + game, đăng nhập rồi mới đăng bài được. Bài gắn nhãn “Bài mẫu” là dữ liệu mẫu từ bản dựng thử.</p>'
-    + '<div class="f-hero-actions"><a class="f-btn f-btn-accent" href="/dien-dan/tao-bai">Tạo bài viết</a></div>'
+    + '<a class="f-quick" href="/dien-dan/tao-bai">' + avatar(me || "?") + '<span class="f-quick-text">Bạn muốn chia sẻ gì với thị trấn?</span>'
+    + '<span class="f-quick-btn">Ảnh</span><span class="f-quick-btn f-quick-post">Đăng bài</span></a>'
     + '<p class="f-stats"><b>8</b> thành viên · <b>10</b> chủ đề · <b>25</b> bài viết</p></div>'
     + '<h2 class="f-h2">' + icon("flame", 20) + ' Đang hot</h2><div>' + THREADS.slice(0, 5).map((t, i) => hotRow(i + 1, t)).join("") + '</div>'
     + '<h2 class="f-h2">Chuyên mục</h2><div class="f-cats">' + CATS.map(catRow).join("") + '</div>'
@@ -195,7 +202,7 @@ function pgNew(me) {
     + '<form class="form f-form" id="newThreadForm"><label>Chuyên mục<select name="category_id" id="ntCat">' + opts + '</select></label>'
     + '<label>Tiêu đề<input name="title" id="ntTitle" maxlength="120" required placeholder="Viết tiêu đề ngắn gọn, rõ ý…"></label>'
     + '<label>Thẻ (cách nhau bằng dấu phẩy, tối đa 5)<input name="tags" id="ntTags" maxlength="120" placeholder="vd: nhà-gỗ, góp-ý"></label>'
-    + '<label>Nội dung<textarea name="content" id="ntContent" rows="10" maxlength="8000" required placeholder="Viết nội dung bài viết…"></textarea></label>'
+    + '<label>Nội dung<textarea name="content" id="ntContent" rows="10" maxlength="7500" placeholder="Viết nội dung bài viết…"></textarea></label>' + ATTACH
     + '<p class="form-msg" id="ntMsg"></p><button class="f-btn f-btn-accent f-btn-block" type="submit">Đăng bài</button></form>';
   return forumPage("Tạo bài viết", fLayout(fHeader("", me), sidebar(null, me), main, rail()));
 }
@@ -219,7 +226,7 @@ function pgThread(tid, me) {
     return `<article class="f-post${isOp ? " f-op" : ""}${p.best ? " f-best" : ""}${depth ? " f-depth-" + depth : ""}" id="post-${p.id}">`
       + '<div class="f-post-inner"><div class="f-post-main">'
       + `<header>${avatar(p.a, 40)}<span><b>${esc(p.a)}</b> ${rolePill(p.a)}${isOp ? ' <span class="f-badge">Chủ thớt</span>' : ""} <span class="f-badge trust">${trustLabel(p.n)}</span> ${best}`
-      + `<span class="muted"> · ${p.d}</span></span></header><div class="f-post-body">${text(p.c)}</div><div class="f-actions">${reacts}`
+      + `<span class="muted"> · ${p.d}</span></span></header><div class="f-post-body">${text(p.c)}${isOp ? imgHtml(SAMPLE_IMG) : ""}</div><div class="f-actions">${reacts}`
       + (me ? `<button class="f-mini" data-reply="${p.id}">Trả lời</button><button class="f-mini" data-report="${p.id}">Báo cáo</button>` : "")
       + (me && !isOp && p.a === me ? `<button class="f-mini danger" data-delpost="${p.id}">Xóa bài</button>` : "")
       + '</div></div><div class="f-vote-col">'
@@ -232,7 +239,7 @@ function pgThread(tid, me) {
   const reply = me
     ? '<div class="f-composer"><form class="form f-form" id="replyForm">' + `<input type="hidden" id="rpThread" value="${t.id}">`
       + '<input type="hidden" id="rpParent" value=""><label id="rpParentLabel" hidden>Đang trả lời bài <b id="rpParentName"></b> <button type="button" class="f-mini" id="rpCancel">Hủy</button></label>'
-      + '<label>Trả lời với tên <b>' + esc(me) + '</b><textarea id="rpContent" rows="5" maxlength="8000" required placeholder="Viết trả lời của bạn…"></textarea></label>'
+      + '<label>Trả lời với tên <b>' + esc(me) + '</b><textarea id="rpContent" rows="5" maxlength="7500" placeholder="Viết trả lời của bạn…"></textarea></label>' + ATTACH
       + '<p class="form-msg" id="rpMsg"></p><button class="f-btn f-btn-accent f-btn-block" type="submit">Gửi trả lời</button></form></div>'
     : '<p class="center"><a class="f-btn f-btn-accent" href="/tai-khoan">Đăng nhập để trả lời</a></p>';
   const main = `<p class="f-crumb"><a href="/dien-dan">Diễn đàn</a> / <a href="/dien-dan/chuyen-muc/${t.category_id}">${esc(t.category_name)}</a></p>`
@@ -254,6 +261,7 @@ function api(p, q, req) {
   if (p === "/api/config") return { email_on: true };
   if (p === "/api/forum/threads") return { threads: THREADS.slice(0, 3).map((t) => ({ id: t.id, title: t.title, author: t.author_name, category: t.category_name, replies: t.replies, views: t.views, likes: t.likes })) };
   if (p === "/api/me") return { ok: true, name: "Chooty_427", uuid: "3f2b9c1e-7a4d-4e0b-9c55-0d6f1a2b3c4d", balance: 1284500, discord_id: null, email: "ch***@gmail.com", email_on: true };
+  if (p === "/api/forum/upload") return { ok: true, url: SAMPLE_IMG };
   if (p === "/api/otp/register" || p === "/api/otp/forgot" || p === "/api/otp/setemail") return { ok: true };
   if (req.method === "POST") return { ok: false, error: "Bản xem thử: thao tác này chỉ chạy trên server thật." };
   return null;
