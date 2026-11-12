@@ -1,0 +1,62 @@
+<header class="page-hero">
+  <div class="page-hero-in">
+    <div>
+      <p class="kicker">Sổ hộ tịch thị trấn</p>
+      <h1 class="page-title">Hồ sơ <em>cư dân</em></h1>
+    </div>
+    <img class="page-hero-art" src="/static/img/px/chest.svg" width="128" height="128" alt="">
+  </div>
+</header>
+<section class="section narrow">
+<div class="guide-card">
+    <h3><span class="sec-no">§</span><span id="pfName">…</span></h3>
+    <div class="profile-grid">
+      <div><span class="pf-label">Số dư trong game</span><span class="pf-value gold" id="pfBalance">…</span></div>
+      <div><span class="pf-label">UUID</span><span class="pf-value mono" id="pfUuid">…</span></div>
+      <div><span class="pf-label">Liên kết Discord</span><span class="pf-value" id="pfDiscord">…</span></div>
+    </div>
+    <p class="form-note">Liên kết Discord bằng lệnh <b>/lienket</b> ở bot OLD TOWN trên Discord để nhận role “Cư dân” và chơi Tài Xỉu chung ví Xu.</p>
+    <button class="btn" id="logoutBtn">Đăng xuất</button>
+  </div>
+
+  <div class="guide-card">
+    <h3><span class="sec-no">§</span>ĐỔI MẬT KHẨU</h3>
+    <form id="changeForm" class="form">
+      <label>Mật khẩu hiện tại
+        <input name="old" type="password" autocomplete="current-password" required>
+      </label>
+      <label>Mật khẩu mới (từ 4 ký tự — giống hệt trong game)
+        <input name="new" type="password" autocomplete="new-password" required minlength="4">
+      </label>
+      <label>Nhập lại mật khẩu mới
+        <input name="confirm" type="password" autocomplete="new-password" required minlength="4">
+      </label>
+      <button class="btn btn-green" type="submit">Đổi mật khẩu</button>
+      <p class="form-msg" id="changeMsg"></p>
+    </form>
+  </div>
+  <div class="guide-card" data-email-only>
+    <h3><span class="sec-no">§</span>GMAIL KHÔI PHỤC</h3>
+    <p id="pfEmailStatus">Đang kiểm tra…</p>
+    <p>Gmail này dùng để lấy lại mật khẩu khi quên (mã xác nhận 6 số gửi về hộp thư). Chỉ chấp nhận địa chỉ @gmail.com.</p>
+    <form id="emailForm" class="form">
+      <label>Gmail của bạn
+        <input name="email" id="pfEmail" type="email" autocomplete="email" placeholder="vidu@gmail.com">
+      </label>
+      <button class="btn btn-green" type="submit" id="pfEmailSend"><span class="btn-label">Gửi mã xác nhận</span></button>
+      <p class="form-msg" id="emailMsg"></p>
+    </form>
+    <form id="emailOtpForm" class="form" hidden>
+      <div class="otp-row" id="pfOtpRow">
+        <input class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+        <input class="otp-box" inputmode="numeric" maxlength="1">
+        <input class="otp-box" inputmode="numeric" maxlength="1">
+        <input class="otp-box" inputmode="numeric" maxlength="1">
+        <input class="otp-box" inputmode="numeric" maxlength="1">
+        <input class="otp-box" inputmode="numeric" maxlength="1">
+      </div>
+      <button class="btn btn-green" type="submit"><span class="btn-label">Xác nhận liên kết Gmail</span></button>
+      <p class="form-msg" id="emailOtpMsg"></p>
+    </form>
+  </div>
+</section>

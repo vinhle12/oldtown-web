@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "oldtown-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/preview-server.js"
+      ],
+      "port": 8787
+    }
+  ]
+}

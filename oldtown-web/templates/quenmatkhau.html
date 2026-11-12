@@ -1,0 +1,59 @@
+<header class="page-hero">
+  <div class="page-hero-in">
+    <div>
+      <p class="kicker">Sổ hộ tịch thị trấn</p>
+      <h1 class="page-title">Quên <em>mật khẩu</em></h1>
+      <p class="page-lead">Nhập tên nhân vật và Gmail đã liên kết — thị trấn gửi mã xác nhận 6 số về hộp thư để bạn đặt lại mật khẩu. Mật khẩu mới dùng cho cả web và game.</p>
+    </div>
+    <img class="page-hero-art" src="/static/img/px/shield.svg" width="128" height="128" alt="">
+  </div>
+</header>
+<section class="section narrow auth-page">
+  <div class="auth-card">
+    <div class="auth-body">
+      <div id="forgotOff" hidden>
+        <p class="form-note">Tính năng lấy lại mật khẩu qua Gmail đang được bật. Trong lúc chờ, hãy liên hệ đội quản trị trên Discord kèm tên nhân vật để được hỗ trợ đặt lại.</p>
+        <a class="btn btn-green btn-wide" href="/tai-khoan">Quay lại đăng nhập</a>
+      </div>
+      <form id="forgotForm" class="form">
+        <label>Tên nhân vật
+          <input name="name" autocomplete="username" required maxlength="24" placeholder="Tên trong game — PE gõ cả dấu . ở đầu">
+        </label>
+        <label>Gmail đã liên kết với tài khoản
+          <input name="email" type="email" autocomplete="email" required placeholder="vidu@gmail.com">
+        </label>
+        <button class="btn btn-green btn-wide" type="submit"><span class="btn-label">Gửi mã xác nhận</span></button>
+        <p class="form-msg" id="forgotMsg"></p>
+        <p class="form-note">Vì lý do bảo mật, hệ thống luôn báo “đã gửi” — mã chỉ thật sự được gửi khi tên và Gmail khớp với hồ sơ đã liên kết.</p>
+      </form>
+      <form id="forgotStep2" class="form" hidden>
+        <p class="otp-sub">Nhập mã 6 số trong thư (hiệu lực 10 phút) và đặt mật khẩu mới:</p>
+        <div class="otp-row" id="forgotOtpRow">
+          <input class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+        </div>
+        <label>Mật khẩu mới (từ 4 ký tự — giống hệt trong game)
+          <span class="pw-wrap"><input name="new" id="fgNew" type="password" autocomplete="new-password" required minlength="4"><button class="pw-toggle" type="button" data-pw>Hiện</button></span>
+        </label>
+        <label>Nhập lại mật khẩu mới
+          <span class="pw-wrap"><input name="confirm" id="fgConfirm" type="password" autocomplete="new-password" required minlength="4"><button class="pw-toggle" type="button" data-pw>Hiện</button></span>
+        </label>
+        <button class="btn btn-green btn-wide" type="submit"><span class="btn-label">Đặt lại mật khẩu</span></button>
+        <p class="form-msg" id="forgotMsg2"></p>
+        <div class="mini-actions">
+          <button type="button" class="linklike" id="forgotBack">Quay lại bước 1</button>
+        </div>
+      </form>
+      <div class="auth-success" id="forgotDone" hidden>
+        <div class="as-title">Đặt lại mật khẩu thành công!</div>
+        <p>Mật khẩu mới sẽ áp dụng trong game trong tối đa ~1 phút. Bạn có thể đăng nhập ngay bằng mật khẩu mới:</p>
+        <a class="btn btn-green btn-wide" href="/tai-khoan">Tới trang đăng nhập</a>
+      </div>
+    </div>
+  </div>
+  <p class="muted center auth-alt">Chưa từng liên kết Gmail? Hãy đăng nhập (nếu còn nhớ mật khẩu) và liên kết Gmail trong trang hồ sơ để lần sau khôi phục được.</p>
+</section>

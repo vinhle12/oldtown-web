@@ -1,0 +1,81 @@
+<header class="page-hero">
+  <div class="page-hero-in">
+    <div>
+      <p class="kicker">Sổ hộ tịch thị trấn</p>
+      <h1 class="page-title">Tài khoản <em>OLD TOWN</em></h1>
+      <p class="page-lead">Một tài khoản cho cả web và game — đăng ký ở đây bằng Gmail, vào game đăng nhập ngay bằng lệnh <b>/login</b>. Trên web, bạn đăng nhập bằng <b>chính Gmail đã đăng ký</b> — khỏi phải gõ tên nhân vật.</p>
+    </div>
+    <img class="page-hero-art" src="/static/img/px/head.svg" width="128" height="128" alt="">
+  </div>
+</header>
+<section class="section narrow auth-page">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" type="button">Đăng nhập</button>
+      <button class="auth-tab" id="tabRegister" type="button">Đăng ký mới</button>
+      <span class="auth-tab-ink" id="tabInk"></span>
+    </div>
+    <div class="auth-body">
+      <form id="loginForm" class="form auth-pane">
+        <label>Gmail đã liên kết
+          <input name="name" autocomplete="username" required maxlength="60" placeholder="vidu@gmail.com">
+        </label>
+        <p class="form-note" data-email-only>Đăng nhập bằng Gmail cho gọn — người chơi PE khỏi phải gõ tên có dấu chấm. Tài khoản cũ <b>chưa từng liên kết Gmail</b> được gõ tên nhân vật đúng một giai đoạn chuyển tiếp để vào liên kết Gmail; đã liên kết rồi thì chỉ đăng nhập bằng Gmail (cả trên web lẫn trong game).</p>
+        <label>Mật khẩu
+          <span class="pw-wrap"><input name="password" type="password" autocomplete="current-password" required><button class="pw-toggle" type="button" data-pw>Hiện</button></span>
+        </label>
+        <button class="btn btn-green btn-wide" type="submit"><span class="btn-label">Đăng nhập</span></button>
+        <p class="form-msg" id="loginMsg"></p>
+        <p class="form-note" data-email-only>Quên mật khẩu? <a href="/quen-mat-khau"><b>Lấy lại bằng Gmail</b></a> — mã xác nhận sẽ gửi về hộp thư của bạn.</p>
+      </form>
+      <form id="registerForm" class="form auth-pane" hidden>
+        <label>Tên nhân vật
+          <input name="name" id="regName" autocomplete="username" required maxlength="17" placeholder="PC: TenNhanVat · PE: .TenXboxCuaBan">
+          <span class="field-hint" id="nameHint"></span>
+        </label>
+        <label>Mật khẩu (từ 4 ký tự — giống hệt trong game)
+          <span class="pw-wrap"><input name="password" id="regPass" type="password" autocomplete="new-password" required minlength="4"><button class="pw-toggle" type="button" data-pw>Hiện</button></span>
+          <span class="strength" id="strength"><i></i><i></i><i></i></span>
+        </label>
+        <label>Nhập lại mật khẩu
+          <span class="pw-wrap"><input name="confirm" id="regConfirm" type="password" autocomplete="new-password" required minlength="4"><button class="pw-toggle" type="button" data-pw>Hiện</button></span>
+          <span class="field-hint" id="confirmHint"></span>
+        </label>
+        <label data-email-only>Gmail của bạn (chỉ nhận @gmail.com — để lấy lại mật khẩu khi quên)
+          <input name="email" id="regEmail" type="email" autocomplete="email" placeholder="vidu@gmail.com">
+          <span class="field-hint" id="emailHint"></span>
+        </label>
+        <button class="btn btn-green btn-wide" type="submit"><span class="btn-label" id="regBtnLabel">Tạo tài khoản</span></button>
+        <p class="form-msg" id="registerMsg"></p>
+        <p class="form-note"><b>Người chơi PE (điện thoại/Bedrock):</b> tên trong game của bạn bắt đầu bằng dấu chấm — ví dụ <i>.Lntphong207</i> — khi đăng ký ở đây phải gõ <b>cả dấu chấm</b>, thiếu là thành tài khoản khác. Người chơi PC gõ tên bình thường. Tên phân biệt chữ hoa/thường ở lần vào game đầu tiên — ghi nhớ đúng như lúc đăng ký (ví dụ <i>Chooty_427</i> ≠ <i>chooty_427</i>).</p>
+      </form>
+      <div class="auth-otp" id="otpPane" hidden>
+        <div class="as-title">Nhập mã xác nhận</div>
+        <p class="otp-sub">Mã gồm 6 số vừa được gửi tới <b id="otpEmailEcho"></b>. Mã có hiệu lực 10 phút — kiểm tra cả hộp thư rác (Spam) nếu chưa thấy.</p>
+        <div class="otp-row" id="regOtpRow">
+          <input class="otp-box" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+          <input class="otp-box" inputmode="numeric" maxlength="1">
+        </div>
+        <button class="btn btn-green btn-wide" id="otpVerifyBtn" type="button"><span class="btn-label">Xác nhận &amp; tạo tài khoản</span></button>
+        <p class="form-msg" id="otpMsg"></p>
+        <div class="mini-actions">
+          <button type="button" class="linklike" id="otpResend">Gửi lại mã</button>
+          <span class="dot-sep">·</span>
+          <button type="button" class="linklike" id="otpBack">Quay lại sửa thông tin</button>
+        </div>
+      </div>
+      <div class="auth-success" id="authSuccess" hidden>
+        <div class="as-title">Tài khoản đã sẵn sàng!</div>
+        <p id="authSuccessText"></p>
+        <p id="authSuccessMail"></p>
+        <p class="form-note">Mở Minecraft → vào server OLD TOWN → gõ <b>/login &lt;mật khẩu của bạn&gt;</b> là chơi được ngay. Hoặc xem hồ sơ cư dân của bạn trên web:</p>
+        <a class="btn btn-green btn-wide" href="/ho-so">Xem hồ sơ cư dân</a>
+      </div>
+    </div>
+  </div>
+  <p class="muted center auth-alt">Quên mật khẩu? Nhờ đội quản trị trên Discord hỗ trợ đặt lại — kèm tên nhân vật của bạn.</p>
+</section>
