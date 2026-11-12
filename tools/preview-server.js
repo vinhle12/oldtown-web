@@ -250,7 +250,7 @@ function pgThread(tid, me) {
 }
 
 // ---------- API mau ----------
-const TOP = [["Chooty_427", 1284500], [".Lntphong207", 962300], ["KienXayNha", 731250], ["ThoMo99", 598400], ["LaoNongOT", 455120],
+const TOP = [["CuDanMau", 1284500], [".BanPE_Mau", 962300], ["KienXayNha", 731250], ["ThoMo99", 598400], ["LaoNongOT", 455120],
   ["BeThaoPE", 310900], ["DanChoJava", 248000], ["CuDanMoi", 96500], ["Steve_VN", 74200], [".MeoMuop", 51800], ["HoaiNam", 33900], ["BlockLover", 12050]]
   .map(([name, balance]) => ({ name, balance }));
 function api(p, q, req) {
@@ -260,7 +260,7 @@ function api(p, q, req) {
   if (p === "/api/topmoney") return { top: TOP };
   if (p === "/api/config") return { email_on: true };
   if (p === "/api/forum/threads") return { threads: THREADS.slice(0, 3).map((t) => ({ id: t.id, title: t.title, author: t.author_name, category: t.category_name, replies: t.replies, views: t.views, likes: t.likes })) };
-  if (p === "/api/me") return { ok: true, name: "Chooty_427", uuid: "3f2b9c1e-7a4d-4e0b-9c55-0d6f1a2b3c4d", balance: 1284500, discord_id: null, email: "ch***@gmail.com", email_on: true };
+  if (p === "/api/me") return { ok: true, name: "CuDanMau", uuid: "3f2b9c1e-7a4d-4e0b-9c55-0d6f1a2b3c4d", balance: 1284500, discord_id: null, email: "ch***@gmail.com", email_on: true };
   if (p === "/api/forum/upload") return { ok: true, url: SAMPLE_IMG };
   if (p === "/api/otp/register" || p === "/api/otp/forgot" || p === "/api/otp/setemail") return { ok: true };
   if (req.method === "POST") return { ok: false, error: "Bản xem thử: thao tác này chỉ chạy trên server thật." };
@@ -294,7 +294,7 @@ http.createServer((req, res) => {
     if (p === "/quen-mat-khau") return html(renderPage("quenmatkhau.html", "Quên mật khẩu — OLD TOWN", null, "taikhoan"));
     const sort = u.searchParams.get("sort") || "new";
     if (p === "/dien-dan") return html(pgForum(sort, me));
-    if (p === "/dien-dan/tao-bai") return html(pgNew(me || "Chooty_427"));
+    if (p === "/dien-dan/tao-bai") return html(pgNew(me || "CuDanMau"));
     let m;
     if ((m = /^\/dien-dan\/chuyen-muc\/(\d+)$/.exec(p))) return html(pgCat(Number(m[1]), sort, me));
     if ((m = /^\/dien-dan\/chu-de\/(\d+)$/.exec(p))) return html(pgThread(Number(m[1]), me));
